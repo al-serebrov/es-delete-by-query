@@ -4,11 +4,24 @@ from pprint import pprint
 import argparse
 
 
-def delete_docs(es_url, index, doc_type, query):
+def delete_docs(es_host, index, doc_type, query):
+    """Delete documents from ES index by query.
 
+    Params:
+        es_host - ElasticSearch host, for example 'localhost' if you're running
+            ElasticSearch locally, or the name of the Docker container,
+            discoverable by Docker Discover Service, like 'es'
+        index - the name of index in which documents will be deleted
+        doc_type - document type
+        query - Lucene ElasticSearch query
+
+    Raises:
+        NotFoundError
+        TransportError
+    """
     # Setup elasticsearch connection.
     es = Elasticsearch(
-        [es_url],
+        [es_host],
         # sniff before doing anything
         sniff_on_start=True,
         # refresh nodes after a node fails to respond
@@ -46,13 +59,13 @@ def delete_docs(es_url, index, doc_type, query):
                     "_type": doc_type,
                     "_id": rec['_id']
                 })
-            pprint(bulk_body)
             print('Deleting records')
             helpers.bulk(es, bulk_body)
             print('Delete successful')
 
     except exceptions.NotFoundError:
-        pass
+        print("Elasticsearch error: " + ex.error)
+        raise ex
     except exceptions.TransportError as ex:
         print("Elasticsearch error: " + ex.error)
         raise ex
@@ -101,7 +114,7 @@ if __name__ == "__main__":
     }
     # Provide a proper ES url, would be like 172.18.0.2:9200
     delete_docs(
-        es_url='http://localhost:9200',
+        es_url='http://es:9200',
         index=index,
         doc_type=doc_type,
         query=delete_query
