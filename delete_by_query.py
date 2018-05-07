@@ -22,7 +22,7 @@ def delete_docs(es_url, index, doc_type, query):
     """
     # Setup elasticsearch connection.
     es = Elasticsearch(
-        [es_host],
+        [es_url],
         # sniff before doing anything
         sniff_on_start=True,
         # refresh nodes after a node fails to respond
