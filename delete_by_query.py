@@ -104,6 +104,7 @@ if __name__ == "__main__":
     )
 
     results = parser.parse_args()
+    es_url = results.es_url
     index = results.index
     doc_type = results.doc_type
     query_filename = results.query_filename
@@ -126,7 +127,7 @@ if __name__ == "__main__":
         }
     # Provide a proper ES url, would be like 172.18.0.2:9200
     delete_docs(
-        es_url='http://localhost:9200',
+        es_url=es_url,
         index=index,
         doc_type=doc_type,
         query=delete_query
