@@ -4,13 +4,14 @@ from pprint import pprint
 import argparse
 
 
-def delete_docs(es_host, index, doc_type, query):
+def delete_docs(es_url, index, doc_type, query):
     """Delete documents from ES index by query.
 
     Params:
-        es_host - ElasticSearch host, for example 'localhost' if you're running
-            ElasticSearch locally, or the name of the Docker container,
-            discoverable by Docker Discover Service, like 'es'
+        es_url - ElasticSearch url, for example 'http://localhost:9200'
+            if you're running ElasticSearch locally, or the name of the Docker
+            container, discoverable by Docker Discovery Service,
+            like 'http://es:9200'
         index - the name of index in which documents will be deleted
         doc_type - document type
         query - Lucene ElasticSearch query
