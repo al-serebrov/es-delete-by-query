@@ -30,13 +30,13 @@ def delete_docs(es_url, index, doc_type, query):
     # Start scrolling
     try:
         while (scroll_size > 0):
-            print "Scrolling..."
+            print("Scrolling...")
             page = es.scroll(scroll_id=sid, scroll='2m')
             # Update the scroll ID
             sid = page['_scroll_id']
             # Get the number of results that we returned in the last scroll
             scroll_size = len(page['hits']['hits'])
-            print "scroll size: " + str(scroll_size)
+            print("scroll size: " + str(scroll_size))
             # Delete these results
             bulk_body = []
             for rec in page['hits']['hits']:
