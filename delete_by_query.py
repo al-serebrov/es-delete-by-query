@@ -77,6 +77,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Delete documents from ElasticSearch by query.'
     )
+
+    parser.add_argument(
+        '-u',
+        '--url',
+        action='store',
+        dest='es_url',
+        default='http://localhost:9200',
+        help='Elasticsearch URL, defaults to http://localhost:9200',
+        required=False
+    )
+
     parser.add_argument(
         '-i',
         '--index',
@@ -96,26 +107,41 @@ if __name__ == "__main__":
         required=False
     )
 
+    parser.add_argument(
+        '-f',
+        '--file',
+        action='store',
+        dest='query_filename',
+        default=None,
+        help='The file with ES query to find and delete documents',
+        required=False
+    )
+
     results = parser.parse_args()
+    es_url = results.es_url
     index = results.index
     doc_type = results.doc_type
+    query_filename = results.query_filename
 
-    delete_query = {
-      "query": {
-        "bool": {
-          "must": [
-            {
-              "exists": {
-                "field": "categories.cat_3"
-              }
+    if query_filename:
+        delete_query = open(query_filename, 'r').read()
+    else:
+        delete_query = {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "exists": {
+                    "field": "categories.cat_3"
+                  }
+                }
+              ]
             }
-          ]
+          }
         }
-      }
-    }
     # Provide a proper ES url, would be like 172.18.0.2:9200
     delete_docs(
-        es_url='http://es:9200',
+        es_url=es_url,
         index=index,
         doc_type=doc_type,
         query=delete_query
