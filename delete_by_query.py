@@ -1,7 +1,31 @@
 # -*- coding: utf-8 -*-
 from elasticsearch import Elasticsearch, helpers, exceptions
-from pprint import pprint
 import argparse
+import logging
+
+logger = logging.getLogger('update_validated')
+logger.setLevel(level=logging.DEBUG)
+
+# create console handler and set level to info
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create file handler and set level to ERROR
+fh = logging.FileHandler('log.txt')
+fh.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# add formatter to console and file handlers
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+
+# add ch and fh to logger
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 def delete_docs(es_url, index, doc_type, query):
@@ -44,13 +68,13 @@ def delete_docs(es_url, index, doc_type, query):
     # Start scrolling
     try:
         while (scroll_size > 0):
-            print("Scrolling...")
+            logger.info("Scrolling...")
             page = es.scroll(scroll_id=sid, scroll='2m')
             # Update the scroll ID
             sid = page['_scroll_id']
             # Get the number of results that we returned in the last scroll
             scroll_size = len(page['hits']['hits'])
-            print("scroll size: " + str(scroll_size))
+            logger.info("scroll size: " + str(scroll_size))
             # Delete these results
             bulk_body = []
             for rec in page['hits']['hits']:
@@ -60,15 +84,15 @@ def delete_docs(es_url, index, doc_type, query):
                     "_type": doc_type,
                     "_id": rec['_id']
                 })
-            print('Deleting records')
+            logger.info('Deleting records')
             helpers.bulk(es, bulk_body)
-            print('Delete successful')
+            logger.info('Delete successful')
 
-    except exceptions.NotFoundError:
-        print("Elasticsearch error: " + ex.error)
+    except exceptions.NotFoundError as ex:
+        logger.error("Elasticsearch error: " + ex.error)
         raise ex
     except exceptions.TransportError as ex:
-        print("Elasticsearch error: " + ex.error)
+        logger.error("Elasticsearch error: " + ex.error)
         raise ex
 
 
