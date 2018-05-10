@@ -28,14 +28,20 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def delete_docs(es_url, index, doc_type, query):
+def delete_docs(es, index, doc_type, query):
     """Delete documents from ES index by query.
 
     Params:
-        es_url - ElasticSearch url, for example 'http://localhost:9200'
-            if you're running ElasticSearch locally, or the name of the Docker
-            container, discoverable by Docker Discovery Service,
-            like 'http://es:9200'
+        es - ElasticSearch connection, for example
+            es = Elasticsearch(
+                [es_url],
+                # sniff before doing anything
+                sniff_on_start=True,
+                # refresh nodes after a node fails to respond
+                sniff_on_connection_fail=True,
+                # and also every 60 seconds
+                sniffer_timeout=60
+            )
         index - the name of index in which documents will be deleted
         doc_type - document type
         query - Lucene ElasticSearch query
@@ -44,16 +50,6 @@ def delete_docs(es_url, index, doc_type, query):
         NotFoundError
         TransportError
     """
-    # Setup elasticsearch connection.
-    es = Elasticsearch(
-        [es_url],
-        # sniff before doing anything
-        sniff_on_start=True,
-        # refresh nodes after a node fails to respond
-        sniff_on_connection_fail=True,
-        # and also every 60 seconds
-        sniffer_timeout=60
-    )
 
     # Start the initial search.
     page = es.search(
@@ -163,9 +159,18 @@ if __name__ == "__main__":
             }
           }
         }
-    # Provide a proper ES url, would be like 172.18.0.2:9200
+    # Setup elasticsearch connection.
+    es = Elasticsearch(
+        [es_url],
+        # sniff before doing anything
+        sniff_on_start=True,
+        # refresh nodes after a node fails to respond
+        sniff_on_connection_fail=True,
+        # and also every 60 seconds
+        sniffer_timeout=60
+    )
     delete_docs(
-        es_url=es_url,
+        es=es,
         index=index,
         doc_type=doc_type,
         query=delete_query
